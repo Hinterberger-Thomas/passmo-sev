@@ -1,0 +1,7 @@
+mysql:
+  dbName: 'mySQL'
+  userName: 'root'
+  dbPass: 'mySQL'
+  port: '3306'
+  ip: '127.0.0.1'
+  protocol: 'tcp'
