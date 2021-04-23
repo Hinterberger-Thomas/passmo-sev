@@ -3,7 +3,7 @@
 # https://gqlgen.com/getting-started/
 
 type User {
-  id: ID!
+  email: String!
   data: String!
 }
 
@@ -17,13 +17,14 @@ type Query {
   passwords: [User!]!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+input AccData{
+  name: String!
+  usern: String!
+  password: String!
 }
 
 type Mutation{
   creAcc(input: String!): Boolean!
   updAcc(input: String!): Boolean!
-  insAcc(input: Account!): Boolean!
+  insAcc(input: AccData!): Boolean!
 }
