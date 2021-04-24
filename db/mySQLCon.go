@@ -29,3 +29,23 @@ func createURL() string {
 	urlData := config.GetConfMySQL()
 	return urlData.UserName + ":" + urlData.DbPass + "@" + urlData.Protocol + "(" + urlData.IP + "" + fmt.Sprint(urlData.Port) + ")/" + urlData.DbName
 }
+
+func (db *DB) InsNewAcc(email string) (bool, error) {
+	insStmt := "INSERT INTO USER VALUES (?);"
+	stmt, err := db.client.Query(insStmt, email)
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+	return true, err
+}
+
+func (db *DB) UpdAccData(email string, data string) (bool, error) {
+	updStmt := "UPDATE table_name SET data = ? WHERE email = ?; "
+	stmt, err := db.client.Query(updStmt, data, email)
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+	return true, err
+}
