@@ -18,7 +18,19 @@ type Query {
   passwords: [User!]!
 }
 
+input UserD{
+  email: String!
+  password: String!
+}
+
+input AccountD{
+  name: String
+  usern: String
+  password: String
+  data: String
+}
+
 type Mutation{
-  creUse(input: User!): Boolean!
-  updAcc(input: Account!): Boolean!
+  creUse(input: UserD!): Boolean!
+  updAcc(input: AccountD!): Boolean!
 }

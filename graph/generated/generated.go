@@ -44,14 +44,15 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Account struct {
+		Data     func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Password func(childComplexity int) int
 		Usern    func(childComplexity int) int
 	}
 
 	Mutation struct {
-		CreUse func(childComplexity int, input string) int
-		UpdAcc func(childComplexity int, input string) int
+		CreUse func(childComplexity int, input model.UserD) int
+		UpdAcc func(childComplexity int, input model.AccountD) int
 	}
 
 	Query struct {
@@ -65,8 +66,8 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreUse(ctx context.Context, input string) (bool, error)
-	UpdAcc(ctx context.Context, input string) (bool, error)
+	CreUse(ctx context.Context, input model.UserD) (bool, error)
+	UpdAcc(ctx context.Context, input model.AccountD) (bool, error)
 }
 type QueryResolver interface {
 	Passwords(ctx context.Context) ([]*model.User, error)
@@ -86,6 +87,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Account.data":
+		if e.complexity.Account.Data == nil {
+			break
+		}
+
+		return e.complexity.Account.Data(childComplexity), true
 
 	case "Account.name":
 		if e.complexity.Account.Name == nil {
@@ -118,7 +126,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreUse(childComplexity, args["input"].(string)), true
+		return e.complexity.Mutation.CreUse(childComplexity, args["input"].(model.UserD)), true
 
 	case "Mutation.updAcc":
 		if e.complexity.Mutation.UpdAcc == nil {
@@ -130,7 +138,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdAcc(childComplexity, args["input"].(string)), true
+		return e.complexity.Mutation.UpdAcc(childComplexity, args["input"].(model.AccountD)), true
 
 	case "Query.passwords":
 		if e.complexity.Query.Passwords == nil {
@@ -230,15 +238,28 @@ type Account{
   name: String!
   usern: String!
   password: String!
+  data: String!
 }
 
 type Query {
   passwords: [User!]!
 }
 
+input UserD{
+  email: String!
+  password: String!
+}
+
+input AccountD{
+  name: String
+  usern: String
+  password: String
+  data: String
+}
+
 type Mutation{
-  creUse(input: String!): Boolean!
-  updAcc(input: String!): Boolean!
+  creUse(input: UserD!): Boolean!
+  updAcc(input: AccountD!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -251,10 +272,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_creUse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 model.UserD
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalNUserD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUserD(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -266,10 +287,10 @@ func (ec *executionContext) field_Mutation_creUse_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_updAcc_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 model.AccountD
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalNAccountD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccountD(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -436,6 +457,41 @@ func (ec *executionContext) _Account_password(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Account_data(ctx context.Context, field graphql.CollectedField, obj *model.Account) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Account",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_creUse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -461,7 +517,7 @@ func (ec *executionContext) _Mutation_creUse(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreUse(rctx, args["input"].(string))
+		return ec.resolvers.Mutation().CreUse(rctx, args["input"].(model.UserD))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -503,7 +559,7 @@ func (ec *executionContext) _Mutation_updAcc(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdAcc(rctx, args["input"].(string))
+		return ec.resolvers.Mutation().UpdAcc(rctx, args["input"].(model.AccountD))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1783,6 +1839,78 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAccountD(ctx context.Context, obj interface{}) (model.AccountD, error) {
+	var it model.AccountD
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "usern":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usern"))
+			it.Usern, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "data":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("data"))
+			it.Data, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUserD(ctx context.Context, obj interface{}) (model.UserD, error) {
+	var it model.UserD
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1814,6 +1942,11 @@ func (ec *executionContext) _Account(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "password":
 			out.Values[i] = ec._Account_password(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "data":
+			out.Values[i] = ec._Account_data(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2185,6 +2318,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNAccountD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccountD(ctx context.Context, v interface{}) (model.AccountD, error) {
+	res, err := ec.unmarshalInputAccountD(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2260,6 +2398,11 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋHinterbergerᚑThomas
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUserD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUserD(ctx context.Context, v interface{}) (model.UserD, error) {
+	res, err := ec.unmarshalInputUserD(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

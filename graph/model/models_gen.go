@@ -6,9 +6,22 @@ type Account struct {
 	Name     string `json:"name"`
 	Usern    string `json:"usern"`
 	Password string `json:"password"`
+	Data     string `json:"data"`
+}
+
+type AccountD struct {
+	Name     *string `json:"name"`
+	Usern    *string `json:"usern"`
+	Password *string `json:"password"`
+	Data     *string `json:"data"`
 }
 
 type User struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserD struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
