@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Hinterberger-Thomas/passmo-sev/config"
+	"github.com/Hinterberger-Thomas/passmo-sev/graph/model"
 )
 
 type DB struct {
@@ -40,9 +41,9 @@ func (db *DB) InsNewAcc(email string, password string) (bool, error) {
 	return true, err
 }
 
-func (db *DB) UpdAccData(email string, password string, data string, usern string) (bool, error) {
-	updStmt := "UPDATE data SET password = ?, data = ?, email = ? WHERE  = ?; "
-	stmt, err := db.client.Query(updStmt, password, data, email, usern)
+func (db *DB) UpdAccData(data model.AccountD) (bool, error) {
+	updStmt := "UPDATE data SET password = ?, data = ?, username = ? WHERE name = ?; "
+	stmt, err := db.client.Query(updStmt, data.Password, data.Data, data.Usern, data.Name)
 	if err != nil {
 		return false, err
 	}
