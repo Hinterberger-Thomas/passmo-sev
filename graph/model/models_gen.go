@@ -2,12 +2,6 @@
 
 package model
 
-type AccData struct {
-	Name     string `json:"name"`
-	Usern    string `json:"usern"`
-	Password string `json:"password"`
-}
-
 type Account struct {
 	Name     string `json:"name"`
 	Usern    string `json:"usern"`

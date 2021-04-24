@@ -17,14 +17,7 @@ type Query {
   passwords: [User!]!
 }
 
-input AccData{
-  name: String!
-  usern: String!
-  password: String!
-}
-
 type Mutation{
-  creAcc(input: String!): Boolean!
+  creUse(input: String!): Boolean!
   updAcc(input: String!): Boolean!
-  insAcc(input: AccData!): Boolean!
 }

@@ -50,8 +50,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreAcc func(childComplexity int, input string) int
-		InsAcc func(childComplexity int, input model.AccData) int
+		CreUse func(childComplexity int, input string) int
 		UpdAcc func(childComplexity int, input string) int
 	}
 
@@ -66,9 +65,8 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreAcc(ctx context.Context, input string) (bool, error)
+	CreUse(ctx context.Context, input string) (bool, error)
 	UpdAcc(ctx context.Context, input string) (bool, error)
-	InsAcc(ctx context.Context, input model.AccData) (bool, error)
 }
 type QueryResolver interface {
 	Passwords(ctx context.Context) ([]*model.User, error)
@@ -110,29 +108,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Account.Usern(childComplexity), true
 
-	case "Mutation.creAcc":
-		if e.complexity.Mutation.CreAcc == nil {
+	case "Mutation.creUse":
+		if e.complexity.Mutation.CreUse == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_creAcc_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_creUse_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreAcc(childComplexity, args["input"].(string)), true
-
-	case "Mutation.insAcc":
-		if e.complexity.Mutation.InsAcc == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_insAcc_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.InsAcc(childComplexity, args["input"].(model.AccData)), true
+		return e.complexity.Mutation.CreUse(childComplexity, args["input"].(string)), true
 
 	case "Mutation.updAcc":
 		if e.complexity.Mutation.UpdAcc == nil {
@@ -250,16 +236,9 @@ type Query {
   passwords: [User!]!
 }
 
-input AccData{
-  name: String!
-  usern: String!
-  password: String!
-}
-
 type Mutation{
-  creAcc(input: String!): Boolean!
+  creUse(input: String!): Boolean!
   updAcc(input: String!): Boolean!
-  insAcc(input: AccData!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -269,28 +248,13 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_creAcc_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_creUse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_insAcc_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.AccData
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNAccData2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccData(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -472,7 +436,7 @@ func (ec *executionContext) _Account_password(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_creAcc(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_creUse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -489,7 +453,7 @@ func (ec *executionContext) _Mutation_creAcc(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_creAcc_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_creUse_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -497,7 +461,7 @@ func (ec *executionContext) _Mutation_creAcc(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreAcc(rctx, args["input"].(string))
+		return ec.resolvers.Mutation().CreUse(rctx, args["input"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -540,48 +504,6 @@ func (ec *executionContext) _Mutation_updAcc(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().UpdAcc(rctx, args["input"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_insAcc(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_insAcc_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().InsAcc(rctx, args["input"].(model.AccData))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1861,42 +1783,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAccData(ctx context.Context, obj interface{}) (model.AccData, error) {
-	var it model.AccData
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "usern":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("usern"))
-			it.Usern, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "password":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
-			it.Password, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1957,18 +1843,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "creAcc":
-			out.Values[i] = ec._Mutation_creAcc(ctx, field)
+		case "creUse":
+			out.Values[i] = ec._Mutation_creUse(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "updAcc":
 			out.Values[i] = ec._Mutation_updAcc(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "insAcc":
-			out.Values[i] = ec._Mutation_insAcc(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2303,11 +2184,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
-
-func (ec *executionContext) unmarshalNAccData2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccData(ctx context.Context, v interface{}) (model.AccData, error) {
-	res, err := ec.unmarshalInputAccData(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
