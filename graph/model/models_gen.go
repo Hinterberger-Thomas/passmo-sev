@@ -9,6 +9,6 @@ type Account struct {
 }
 
 type User struct {
-	Email string `json:"email"`
-	Data  string `json:"data"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
