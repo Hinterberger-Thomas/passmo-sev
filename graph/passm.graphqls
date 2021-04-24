@@ -11,6 +11,7 @@ type Account{
   name: String!
   usern: String!
   password: String!
+  data: String!
 }
 
 type Query {
@@ -18,6 +19,6 @@ type Query {
 }
 
 type Mutation{
-  creUse(input: String!): Boolean!
-  updAcc(input: String!): Boolean!
+  creUse(input: User!): Boolean!
+  updAcc(input: Account!): Boolean!
 }
