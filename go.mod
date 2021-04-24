@@ -10,6 +10,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/jgautheron/goconst v1.4.0 // indirect
 	github.com/mdempsky/unconvert v0.0.0-20200228143138-95ecdbfc0b5f // indirect
 	github.com/mibk/dupl v1.0.0 // indirect
 	github.com/neelance/parallel v0.0.0-20160708114440-4de9ce63d14c // indirect
