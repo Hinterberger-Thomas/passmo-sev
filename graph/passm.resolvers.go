@@ -7,20 +7,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Hinterberger-Thomas/passmo-sev/db"
 	"github.com/Hinterberger-Thomas/passmo-sev/graph/generated"
 	"github.com/Hinterberger-Thomas/passmo-sev/graph/model"
 )
 
-func (r *mutationResolver) CreAcc(ctx context.Context, input string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+var dbc *db.DB = db.InitDB()
+
+func (r *mutationResolver) CreUse(ctx context.Context, input string) (bool, error) {
+	return dbc.InsNewAcc(input)
 }
 
 func (r *mutationResolver) UpdAcc(ctx context.Context, input string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) InsAcc(ctx context.Context, input model.AccData) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	return dbc.UpdAccData(email, input)
 }
 
 func (r *queryResolver) Passwords(ctx context.Context) ([]*model.User, error) {
