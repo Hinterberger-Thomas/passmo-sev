@@ -31,9 +31,9 @@ func createURL() string {
 	return urlData.UserName + ":" + urlData.DbPass + "@" + urlData.Protocol + "(" + urlData.IP + "" + fmt.Sprint(urlData.Port) + ")/" + urlData.DbName
 }
 
-func (db *DB) InsNewAcc(email string, password string) (bool, error) {
+func (db *DB) InsNewAcc(data model.UserD) (bool, error) {
 	insStmt := "INSERT INTO USER (email, password) VALUES (?,?);"
-	stmt, err := db.client.Query(insStmt, email, password)
+	stmt, err := db.client.Query(insStmt, data.Email, data.Password)
 	if err != nil {
 		return false, err
 	}
