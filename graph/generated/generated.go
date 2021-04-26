@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreAcc func(childComplexity int, input model.AccountD) int
 		CreUse func(childComplexity int, input model.UserD) int
 		UpdAcc func(childComplexity int, input model.AccountD) int
 	}
@@ -67,10 +68,11 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreUse(ctx context.Context, input model.UserD) (bool, error)
+	CreAcc(ctx context.Context, input model.AccountD) (bool, error)
 	UpdAcc(ctx context.Context, input model.AccountD) (bool, error)
 }
 type QueryResolver interface {
-	Passwords(ctx context.Context) ([]*model.User, error)
+	Passwords(ctx context.Context) ([]*model.Account, error)
 }
 
 type executableSchema struct {
@@ -115,6 +117,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Account.Usern(childComplexity), true
+
+	case "Mutation.creAcc":
+		if e.complexity.Mutation.CreAcc == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_creAcc_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreAcc(childComplexity, args["input"].(model.AccountD)), true
 
 	case "Mutation.creUse":
 		if e.complexity.Mutation.CreUse == nil {
@@ -242,7 +256,7 @@ type Account{
 }
 
 type Query {
-  passwords: [User!]!
+  passwords: [Account!]!
 }
 
 input UserD{
@@ -259,6 +273,7 @@ input AccountD{
 
 type Mutation{
   creUse(input: UserD!): Boolean!
+  creAcc(input: AccountD!): Boolean!
   updAcc(input: AccountD!): Boolean!
 }
 `, BuiltIn: false},
@@ -268,6 +283,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_creAcc_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.AccountD
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNAccountD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccountD(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_creUse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -534,6 +564,48 @@ func (ec *executionContext) _Mutation_creUse(ctx context.Context, field graphql.
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_creAcc(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_creAcc_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreAcc(rctx, args["input"].(model.AccountD))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_updAcc(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -606,9 +678,9 @@ func (ec *executionContext) _Query_passwords(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.User)
+	res := resTmp.([]*model.Account)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNAccount2ᚕᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1981,6 +2053,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "creAcc":
+			out.Values[i] = ec._Mutation_creAcc(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "updAcc":
 			out.Values[i] = ec._Mutation_updAcc(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -2318,6 +2395,53 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAccount2ᚕᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Account) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAccount2ᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccount(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNAccount2ᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccount(ctx context.Context, sel ast.SelectionSet, v *model.Account) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Account(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNAccountD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐAccountD(ctx context.Context, v interface{}) (model.AccountD, error) {
 	res, err := ec.unmarshalInputAccountD(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2351,53 +2475,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNUserD2githubᚗcomᚋHinterbergerᚑThomasᚋpassmoᚑsevᚋgraphᚋmodelᚐUserD(ctx context.Context, v interface{}) (model.UserD, error) {
