@@ -15,7 +15,7 @@ type Account{
 }
 
 type Query {
-  passwords: [User!]!
+  passwords: [Account!]!
 }
 
 input UserD{
@@ -32,5 +32,6 @@ input AccountD{
 
 type Mutation{
   creUse(input: UserD!): Boolean!
+  creAcc(input: AccountD!): Boolean!
   updAcc(input: AccountD!): Boolean!
 }
