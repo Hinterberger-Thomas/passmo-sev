@@ -41,15 +41,6 @@ func (db *DB) InsNewUser(data model.UserD) (bool, error) {
 	return true, err
 }
 
-func (db *DB) InsNewAcc(data model.AccountD) (bool, error) {
-	insStmt := "INSERT INTO account (name,username,password,data) VALUES(?,?,?,?);"
-	_, err := db.client.Query(insStmt)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
 func (db *DB) UpdAccData(data model.AccountD) (bool, error) {
 	updStmt := "UPDATE account SET password = ?, data = ?, username = ? WHERE name = ?; "
 	stmt, err := db.client.Query(updStmt, data.Password, data.Data, data.Usern, data.Name)
@@ -58,6 +49,15 @@ func (db *DB) UpdAccData(data model.AccountD) (bool, error) {
 	}
 	defer stmt.Close()
 	return true, err
+}
+
+func (db *DB) InsNewAcc(data model.AccountD) (bool, error) {
+	insStmt := "INSERT INTO account (name,username,password,data) VALUES(?,?,?,?);"
+	_, err := db.client.Query(insStmt)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (db *DB) GetAllAcc() ([]*model.Account, error) {
