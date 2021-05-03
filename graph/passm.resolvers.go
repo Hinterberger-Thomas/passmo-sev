@@ -30,14 +30,12 @@ func (r *queryResolver) Passwords(ctx context.Context) ([]*model.Account, error)
 }
 
 // Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver
-{
+func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
 }
 
 // Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver
-{
+func (r *Resolver) Query() generated.QueryResolver {
 	return &queryResolver{r}
 }
 
