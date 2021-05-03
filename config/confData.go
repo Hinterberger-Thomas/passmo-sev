@@ -18,7 +18,7 @@ type MySQL struct {
 
 func GetConfMySQL() MySQL {
 	var c MySQL
-	yamlFile, err := ioutil.ReadFile("conf.yaml")
+	yamlFile, err := ioutil.ReadFile("conf.yml")
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
